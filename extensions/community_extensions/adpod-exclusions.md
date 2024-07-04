@@ -24,8 +24,11 @@ Mentioned attributes only applicable if impreesions is an ad pod or slot in adpo
   </tr>
   <tr>
     <td><code>exclcat</code></td>
-    <td>integer</td>
-    <td>Ensures no ads, which belongs to same ad category are served within a pod, if value is <code>1</code>. Default value is <code>0</code>, indicating ads with same category can be served together. ad category must follow <a href="https://github.com/InteractiveAdvertisingBureau/AdCOM/blob/main/AdCOM%20v1.0%20FINAL.md#list_categorytaxonomies">taxonomy</a></td>
+    <td>string array</td>
+    <td>Ensures no ads, with same ad category in the given list are served toghether within a dynamic/dynamic portion of hybrid pod. default is empty list, indicating ads with same category can be served together.
+    In case of structured ad pod, no ad, which belongs to mentioned list of ad catgories will be serve for the slot. 
+    Ad category must follow <a href="https://github.com/InteractiveAdvertisingBureau/AdCOM/blob/main/AdCOM%20v1.0%20FINAL.md#list_categorytaxonomies">taxonomy</a>.
+    e.g. ["IAB-1", "IAB-2"]</td>
   </tr>
 </table>
 
@@ -39,7 +42,8 @@ Mentioned attributes only applicable if impreesions is an ad pod or slot in adpo
   <tr>
     <td><code>excladv</code></td>
     <td>integer</td>
-    <td>Ensures no ads, which belongs to same advertiser domain (e.g., “ford.com”). are served within a pod, if value is <code>1</code>. Default value is <code>0</code>, indicating ads with same domain can be served together.</td>
+    <td>Ensures no ads, with same domain in the given list are served toghether within a dynamic/dynamic portion of hybrid pod. default is empty list, indicating ads with same domain can be served together.
+    In case of structured ad pod, no ad, which belongs to mentioned list of ad domains will be serve for the slot. e.g. ["ford.com", "maruti.com"]</td>
   </tr>
 </table>
 
@@ -47,7 +51,7 @@ Mentioned attributes only applicable if impreesions is an ad pod or slot in adpo
 
 ##### _Dynamic Ad Pod Request_
 
-Request to build a dynamic ad pod where, no same category ads nor ads from same advertiser domains are allowed
+Request to build a dynamic ad pod where, no ads with same `Business and Finance (45)` and `Careers(123)` categories should be served. Also no ads with same domain `ford.com` and `maruti.com` should be served.
 
 ```json
 {
@@ -57,14 +61,21 @@ Request to build a dynamic ad pod where, no same category ads nor ads from same 
             "poddur" : 90,
             "maxseq" : 3,
             "rqddurs" : [30,45,60],
-            "exclcat" : 1,
-            "excladv" : 1
+            "exclcat" : ["52", "123"],
+            "excladv" : ["ford.com", "maruti.com"]
         }
     }]
 }
 ```
 
 ##### _Structured Ad Pod Request_
+
+Request to build a structured ad pod where,
+1st ad should not be from `Business and Finance (45)` and `ford.com`
+2nd ad can be of `any ad category` and from `any domain`
+3rd ad should not be from `Careers(123)`  category but can be from `any domain`
+
+
 ```json
 {
     "imp" : [{
@@ -72,24 +83,54 @@ Request to build a dynamic ad pod where, no same category ads nor ads from same 
             "podid" : "structured_pod",
             "minduration" : 5,
             "maxduration": 10,
-            "exclcat" : 1,
-            "excladv" : 1
+             "exclcat" : ["52"],
+            "excladv" : ["ford.com"]
         }
     },{
         "video" : {
             "podid" : "structured_pod",
             "minduration" : 10,
             "maxduration": 15,
-            "exclcat" : 1,
-            "excladv" : 1
+            "exclcat" : [],
+            "excladv" : []
         }
     },{
         "video" : {
             "podid" : "structured_pod",
             "minduration" : 15,
             "maxduration": 30,
-            "exclcat" : 1,
-            "excladv" : 1
+            "exclcat" : ["123"],
+            "excladv" : []
+        }
+    }]
+}
+```
+
+##### _Dynamic Ad Pod Request_
+
+Request to build a hybrid ad pod where,
+1st ad should not be from `Business and Finance (45)` and `ford.com`
+dynamic portion no ads with same `Business and Finance (45)` categories should be served. Also no ads with same domain `maruti.com` should be served.
+
+```json
+{
+    "imp" : [{
+        "video" : {
+            "podid" : "hybrid_pod",
+            "minduration" : 5,
+            "maxduration": 10,
+            "exclcat" : ["52"],
+            "excladv" : ["ford.com"]
+        }
+    },
+    {
+        "video" : {
+            "podid": "hybrid_pod",
+            "poddur" : 90,
+            "maxseq" : 3,
+            "rqddurs" : [30,45,60],
+            "exclcat" : ["123"],
+            "excladv" : ["maruti.com"]
         }
     }]
 }
